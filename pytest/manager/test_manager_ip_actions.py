@@ -14,6 +14,7 @@ def test_example(page: Page) -> None:
     page.get_by_placeholder("Enter a title for this").click()
     page.get_by_placeholder("Enter a title for this").fill("test")
     page.get_by_role("button", name="Create").click()
+    expect(page.get_by_role("alert")).not_to_be_visible()
 
     # import IP from Patent ID
     page.get_by_role("banner").get_by_role("link").click()
