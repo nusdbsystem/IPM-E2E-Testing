@@ -7,5 +7,3 @@ class AccountInfo:
     password: str
     
 
-ManagerAccount = AccountInfo(email="lingze_m@ip8value.com", password="lingze")
-InventorAccount = AccountInfo(email="lingze_v@ip8value.com", password="123")
