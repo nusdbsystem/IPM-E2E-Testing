@@ -145,7 +145,6 @@ def test_manager_assign_ip_inventor(homepage: Page) -> None:
         page.get_by_role("button", name="Confirm").click()
 
     # add inventors
-
     page.get_by_role("button", name="Add").first.click()
     page.locator("div").filter(has_text=re.compile(
         r"^Select inventor$")).nth(3).click()
@@ -188,5 +187,125 @@ def test_manager_assign_ip_inventor(homepage: Page) -> None:
     page.get_by_role("link", name=title, exact=True).click()
 
     # delete the created ip
+    page.get_by_role("button", name="Delete").click()
+    page.get_by_role("button", name="Confirm").click()
+
+
+
+
+@pytest.mark.parametrize("role", ["inventor"])
+def test_inventor_submit_ip_to_manager(homepage: Page) -> None:
+    """
+    1. inventor create a new ip
+    2. inventor submit this ip to manager
+    3. manager check this ip, and delete it
+    """
+
+    page = homepage
+    title = "IP for Team Coporation"
+
+    # create new ip
+    page.get_by_role("link", name="Inventions").click()
+    page.get_by_role("button", name="Create").click()
+    page.get_by_placeholder("Enter a title for this").click()
+    page.get_by_placeholder("Enter a title for this").fill(title)
+    page.get_by_role("button", name="Create").click()
+
+    # submit to manager
+    page.get_by_role("button", name="Submit").click()
+    page.locator("div").filter(has_text=re.compile(
+        r"^Select manager$")).nth(3).click()
+    page.get_by_text("lingze_manager (lingze_m@").click()
+    page.get_by_role("button", name="Add").click()
+
+    # click into the IP page
+
+    page.get_by_placeholder("Search...").click()
+    page.get_by_placeholder("Search...").fill(title)
+    page.get_by_placeholder("Search...").press("Enter")
+    page.get_by_role("link", name=title, exact=True).click()
+
+    # resubmit to manager
+    page.get_by_role("button", name="Submit").click()
+    page.locator("div").filter(has_text=re.compile(
+        r"^Select manager$")).nth(3).click()
+    page.get_by_text("lingze_manager (lingze_m@").click()
+    page.get_by_role("button", name="Add").click()
+
+    # assert the error msg
+    expect(page.get_by_text("This manager has already been")).to_be_visible()
+
+    # login manager account
+    manager_login(page)
+
+    page.get_by_role("link", name="Inventions").click()
+    page.get_by_placeholder("Search...").click()
+    page.get_by_placeholder("Search...").fill(title)
+    page.get_by_placeholder("Search...").press("Enter")
+    page.get_by_role("link", name=title).click()
+    page.get_by_text("Advanced").click()
+
+    # get the inventor email, assert it should be exist
+    page.get_by_role("row", name=InventorAccount.email).is_visible()
+    # make use the inventor should be on the inventor list
+
+    # manager delete this IP
+    page.get_by_role("button", name="Delete").click()
+    page.get_by_role("button", name="Confirm").click()
+    
+
+
+@pytest.mark.parametrize("role", ["manager"])
+def test_pdf_import_ip(homepage: Page) -> None:
+    # manager create a ip
+    page = homepage
+    # title = "Powering In-Database Dynamic Model Slicing"
+    pdf_path = "./static/ip_example.pdf"
+    page.get_by_role("link", name="Inventions").click()
+    # manager create a empty IP
+    page.get_by_role("button", name="Create").click()
+    page.get_by_text("Import").click()
+    page.get_by_text("[PDF] Tech Paper").click()
+    
+    
+    with page.expect_file_chooser() as fc_info:
+        page.get_by_role("button", name="Browse Files").click()
+    
+    file_chooser = fc_info.value
+    file_chooser.set_files(pdf_path)
+    page.get_by_role("button", name="Import").click()
+    
+    page.wait_for_timeout(5000)
+    
+    
+    # will back to the ip page
+    # successfully delete this page
+    page.get_by_role("button", name="Delete").click()
+    page.get_by_role("button", name="Confirm").click()
+
+
+
+@pytest.mark.parametrize("role", ["manager"])
+def test_disclosure_form_import_ip(homepage: Page) -> None:
+    # manager create a ip
+    page = homepage
+    # title = "Powering In-Database Dynamic Model Slicing"
+    pdf_path = "./static/ip_example.doc"
+    page.get_by_role("link", name="Inventions").click()
+    # manager create a empty IP
+    page.get_by_role("button", name="Create").click()
+    page.get_by_text("Import").click()
+    
+    with page.expect_file_chooser() as fc_info:
+        page.get_by_role("button", name="Browse Files").click()
+    
+    file_chooser = fc_info.value
+    file_chooser.set_files(pdf_path)
+    page.get_by_role("button", name="Import").click()
+    
+    page.wait_for_timeout(5000)
+    
+    # will back to the ip page
+    # successfully delete this page
     page.get_by_role("button", name="Delete").click()
     page.get_by_role("button", name="Confirm").click()
